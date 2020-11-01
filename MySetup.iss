@@ -21,7 +21,7 @@
 #include ".\version.h"
 
 ;指定是否只能在 Windows 7 SP1 及更新版本的操作系统上安装
-;#define Windows7AndNewer
+#define Windows7AndNewer
 
 ;指定是否要注册相关后缀名
 ;#define RegisteAssociations
@@ -110,7 +110,7 @@ SetupMutex                      = {{#MyAppID}Setup,Global\{{#MyAppID}Setup
 AppMutex                        = {{#MyAppMutex}
 #endif
 LanguageDetectionMethod         = uilanguage
-ShowLanguageDialog              = no
+ShowLanguageDialog              = yes
 AllowCancelDuringInstall        = no
 #ifdef _WIN64
 ArchitecturesAllowed            = x64
@@ -123,7 +123,7 @@ DefaultDirName                  = {pf32}\{#MyAppPublisher}\{#MyAppName}
 #ifdef Windows7AndNewer
 MinVersion                      = 0,6.1.7600
 #else
-MinVersion                      = 0,5.1.2600
+MinVersion                      = 0,5.2.2600
 #endif
 #ifdef RegisteAssociations
 ChangesAssociations             = yes
@@ -240,6 +240,7 @@ Source: ".\{tmp}\background_messagebox.png";    DestDir: "{tmp}"; Flags: dontcop
 Source: ".\{tmp}\background_welcome.png";       DestDir: "{tmp}"; Flags: dontcopy solidbreak; Attribs: hidden system
 Source: ".\{tmp}\background_welcome_more.png";  DestDir: "{tmp}"; Flags: dontcopy solidbreak; Attribs: hidden system
 Source: ".\{tmp}\botva2.dll";                   DestDir: "{tmp}"; Flags: dontcopy solidbreak; Attribs: hidden system
+Source: ".\{tmp}\gdi32.dll";                   DestDir: "{tmp}"; Flags: dontcopy solidbreak; Attribs: hidden system
 Source: ".\{tmp}\button_browse.png";            DestDir: "{tmp}"; Flags: dontcopy solidbreak; Attribs: hidden system
 Source: ".\{tmp}\button_cancel.png";            DestDir: "{tmp}"; Flags: dontcopy solidbreak; Attribs: hidden system
 Source: ".\{tmp}\button_close.png";             DestDir: "{tmp}"; Flags: dontcopy solidbreak; Attribs: hidden system

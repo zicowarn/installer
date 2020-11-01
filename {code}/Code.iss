@@ -58,6 +58,7 @@ function ReleaseCapture() : longint; external 'ReleaseCapture@user32.dll stdcall
 function CallWindowProc(lpPrevWndFunc : longint; h : hwnd; Msg : UINT; wParam, lParam : longint) : longint; external 'CallWindowProcW@user32.dll stdcall';
 function SetWindowLong(h : hwnd; Index : integer; NewLong : longint) : longint; external 'SetWindowLongW@user32.dll stdcall';
 function GetWindowLong(h : hwnd; Index : integer) : longint; external 'GetWindowLongW@user32.dll stdcall';
+function GetWindow (HWND: Longint; uCmd: cardinal): Longint;external 'GetWindow@user32.dll stdcall';
 function GetDC(hWnd: HWND): longword; external 'GetDC@user32.dll stdcall';
 function BitBlt(DestDC: longword; X, Y, Width, Height: integer; SrcDC: longword; XSrc, YSrc: integer; Rop: DWORD): BOOL; external 'BitBlt@gdi32.dll stdcall';
 function ReleaseDC(hWnd: HWND; hDC: longword): integer; external 'ReleaseDC@user32.dll stdcall';
@@ -279,19 +280,6 @@ begin
   end;
 end;
 
-//将窗口画面画到准备的窗口上，用来实现Win7及更新的系统的任务栏缩略图的效果
-procedure update_img(HandleW, Msg, idEvent, TimeSys: longword);
-var
-  FormDC, DC: longword;
-begin
-  fake_main_form.ClientWidth := WizardForm.ClientWidth;
-  fake_main_form.ClientHeight := WizardForm.ClientHeight;
-  DC := GetDC(fake_main_form.Handle);
-  FormDC := GetDC(WizardForm.Handle);
-  BitBlt(DC, 0, 0, fake_main_form.ClientWidth, fake_main_form.ClientHeight, FormDC, 0, 0, $00CC0020);
-  ReleaseDC(fake_main_form.Handle, DC);
-  ReleaseDC(WizardForm.Handle, FormDC);
-end;
 
 //初始化任务栏缩略图
 procedure init_taskbar;
@@ -299,26 +287,7 @@ begin
   fake_main_form := TMainForm.Create(nil);
   if is_win7_or_newer then
   begin
-    fake_main_form.BorderStyle := bsNone;
-    fake_main_form.ClientWidth := WizardForm.ClientWidth;
-    fake_main_form.ClientHeight := WizardForm.ClientHeight;
-    fake_main_form.Left := WizardForm.Left - ScaleX(999999);
-    fake_main_form.Top := WizardForm.Top - ScaleY(999999);
-    fake_main_form.Show;
-    taskbar_update_timer := SetTimer(0, 0, 500, WrapTimerProc(@Update_Img, 4));
-  end;
-end;
-
-//销毁任务栏缩略图定时器
-procedure deinit_taskbar;
-begin
-  if is_win7_or_newer then
-  begin
-    if (taskbar_update_timer <> 0) then
-    begin
-      KillTimer(0, taskbar_update_timer);
-      taskbar_update_timer := 0;
-    end;
+    SetWindowLong(WizardForm.Handle, -8, GetWindowLong(GetWindow(WizardForm.Handle, 4),-8));
   end;
 end;
 
@@ -695,7 +664,6 @@ end;
 //释放安装程序时调用的脚本
 procedure release_installer();
 begin
-  deinit_taskbar;
   stop_slide_timer;
   stop_animation_timer;
   gdipShutdown();
@@ -746,7 +714,7 @@ end;
 procedure CancelButtonClick(CurPageID : integer; var Cancel, Confirm: boolean);
 begin
   Confirm := False;
-  messagebox_close.Center();
+  //messagebox_close.Center();
   messagebox_close.ShowModal();
   if can_exit_setup then
   begin
@@ -894,7 +862,6 @@ procedure DeinitializeSetup();
 begin
   if ((is_wizardform_released = False) and (can_exit_setup = False)) then
   begin
-    deinit_taskbar;
     stop_slide_timer;
     stop_animation_timer;
     gdipShutdown();
